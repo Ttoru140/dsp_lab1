@@ -1,0 +1,30 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.signal.windows import hamming
+fs = 8000
+N = 256
+n = np.arange(N)
+f1 = 1000
+f2 = 2000
+
+x = np.sin(2*np.pi*f1*n/fs)+0.5*np.sin(2*np.pi*f2*n/fs+3*np.pi/4)
+w = np.hamming(N)
+x_w = x*w
+#compute dft
+X = np.fft.fft(x)
+Xw = np.fft.fft(x_w)
+
+freq = np.fft.fftfreq(N,d=1/fs)
+
+plt.figure(figsize=(12,6))
+plt.subplot(2,1,1)
+plt.title("without window")
+plt.plot(freq[:N//2], np.abs(X[:N//2]))
+plt.grid()
+
+plt.subplot(2,1,2)
+plt.title("DFT with Hamming Window")
+plt.plot(freq[:N//2], np.abs(Xw[:N//2]))
+plt.grid()
+plt.tight_layout()
+plt.show()

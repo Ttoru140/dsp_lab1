@@ -1,0 +1,52 @@
+import matplotlib.pyplot as plt
+
+# Manual convolution function
+def convolution(x, h):
+    len_x = len(x)
+    len_h = len(h)
+    y_length = len_x + len_h - 1
+    y = [0] * y_length
+
+    for n in range(y_length):
+        for k in range(len_x):
+            if 0 <= n - k < len_h:
+                y[n] += x[k] * h[n - k]
+    
+    return y
+
+# Example signals
+x = [1, 2, 3]
+h = [0, 1, 0.5]
+y = convolution(x, h)
+
+# Create sample indexes
+n_x = list(range(len(x)))
+n_h = list(range(len(h)))
+n_y = list(range(len(y)))
+
+# Plotting
+plt.figure(figsize=(12, 6))
+
+plt.subplot(3, 1, 1)
+plt.stem(n_x, x)
+plt.title("Input Signal x[n]")
+plt.xlabel("n")
+plt.ylabel("Amplitude")
+plt.grid()
+
+plt.subplot(3, 1, 2)
+plt.stem(n_h, h)
+plt.title("Impulse Response h[n]")
+plt.xlabel("n")
+plt.ylabel("Amplitude")
+plt.grid()
+
+plt.subplot(3, 1, 3)
+plt.stem(n_y, y)
+plt.title("Output y[n] = x[n] * h[n] (Convolution Result)")
+plt.xlabel("n")
+plt.ylabel("Amplitude")
+plt.grid()
+
+plt.tight_layout()
+plt.show()

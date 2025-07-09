@@ -1,0 +1,66 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Step 1: Signal Generation
+fs = 100  # Sampling frequency
+t = np.arange(0, 1, 1/fs)  # 1 second
+
+# Pure signal and noise
+x_signal = np.sin(2 * np.pi * 10 * t)
+x_noise = np.sin(2 * np.pi * 100 * t)
+x_noisy = x_signal + x_noise
+
+# Step 2: Manual FIR Filter Design (Low-pass with Hamming window)
+
+def ideal_lowpass(cutoff, fs, N):
+    fc = cutoff / fs  # Normalized cutoff (0 to 0.5)
+    h = np.zeros(N)
+    M = N - 1
+    for n in range(N):
+        if n == M / 2:
+            h[n] = 2 * fc
+        else:
+            h[n] = np.sin(2 * np.pi * fc * (n - M / 2)) / (np.pi * (n - M / 2))
+    return h
+
+def hamming_window(N):
+    return 0.54 - 0.46 * np.cos(2 * np.pi * np.arange(N) / (N - 1))
+
+# Filter specs
+cutoff = 20  # Hz
+N = 51       # Filter length (odd)
+h_ideal = ideal_lowpass(cutoff, fs, N)
+h_hamming = h_ideal * hamming_window(N)  # Apply Hamming window
+
+# Step 3: Manual Convolution
+def manual_convolve(x, h):
+    N = len(x)
+    M = len(h)
+    y = np.zeros(N + M - 1)
+    for n in range(N + M - 1):
+        for k in range(M):
+            if 0 <= n - k < N:
+                y[n] += h[k] * x[n - k]
+    return y
+
+# Apply filter
+x_filtered = manual_convolve(x_noisy, h_hamming)
+
+# Truncate to match original signal length
+x_filtered = x_filtered[:len(t)]
+
+# Step 4: Plotting
+plt.figure(figsize=(12, 6))
+
+plt.subplot(2, 1, 1)
+plt.plot(t, x_noisy)
+plt.title("Noisy Signal (10 Hz + 100 Hz)")
+plt.grid()
+
+plt.subplot(2, 1, 2)
+plt.plot(t, x_filtered)
+plt.title("Filtered Signal (Low-pass FIR, 20 Hz cutoff, manual design)")
+plt.grid()
+
+plt.tight_layout()
+plt.show()
